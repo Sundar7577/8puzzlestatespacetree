@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle State Space Tree</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+
+    <!-- Include vis.js library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+    
+        .bg-body-tertiary {
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+    
+        .text-center {
+            text-align: center;
+        }
+    
+        .form-cont {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px auto;
+            width: 100%; /* Take up the entire width of the screen */
+            max-width: 800px; /* Set a maximum width for the form */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+    
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    
+        #network {
+            margin: 0; /* Remove margin to take up entire screen */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #fff;
+            width: 100vw; /* 100% of viewport width */
+            height: 100vh; /* 100% of viewport height */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    
+</head>
+
+<body>
+    <div class="form-cont">
+        <h1 class="bg-body-tertiary text-center">8 Puzzle Game State Space Tree Visualizer</h1>
+        <form method="POST">
+            <label for="search_algorithm">Select Search Algorithm:</label>
+            <select name="search_algorithm" id="search_algorithm">
+                <option value="bfs">BFS</option>
+                <option value="dfs">DFS</option>
+            </select>
+            <br>
+            <label for="initial">Initial State:</label>
+            <input type="text" name="initial" required>
+            <br>
+            <label for="final">Goal State:</label>
+            <input type="text" name="final" required>
+            <br>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <div id="network"></div>
+   
+
+    <script>
+        var nodes = null;
+        var edges = null;
+        var network = null;
+
+        // JavaScript code to create nodes with images
+        var nodesData = new vis.DataSet({{ nodes| safe }});
+        var nodesArray = [];
+
+        nodesData.forEach(function (data, index) {
+            console.log(data.label)
+
+            // var dataarray = JSON.parse(data.label);
+            // var fillcolor = 'orange';
+            // var textcolor = 'black';
+            // var strokecolor = 'white';
+
+            // // Create an SVG with the desired content
+            // var svg = '<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">';
+            // svg += '<rect x="0" y="0" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<rect x="66.66" y="0" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<rect x="133.32" y="0" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<rect x="0" y="66.66" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<rect x="66.66" y="66.66" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<rect x="133.32" y="66.66" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<rect x="0" y="133.32" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<rect x="66.66" y="133.32" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<rect x="133.32" y="133.32" width="66.66" height="66.66" fill="'+fillcolor+'" stroke="black" stroke-width="2" />';
+            // svg += '<text x="33.33" y="50" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[0] + '</text>';
+            // svg += '<text x="100" y="50" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[1] + '</text>';
+            // svg += '<text x="166.66" y="50" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[2] + '</text>';
+            // svg += '<text x="33.33" y="116.66" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[3] + '</text>';
+            // svg += '<text x="100" y="116.66" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[4] + '</text>';
+            // svg += '<text x="166.66" y="116.66" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[5] + '</text>';
+            // svg += '<text x="33.33" y="183.32" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[6] + '</text>';
+            // svg += '<text x="100" y="183.32" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[7] + '</text>';
+            // svg += '<text x="166.66" y="183.32" font-size="60" text-anchor="middle" fill="'+textcolor+'">' + dataarray[8] + '</text>';
+            // svg += '</svg>';
+            var dataarray = JSON.parse(data.label);
+            var fillcolor = 'blue';
+            var textcolor = 'yellow';
+            var strokecolor = 'white';
+            var strokewidth = 10;
+            var fontsize =75;
+            var svgwidth = 400; // Increase SVG width
+            var svgheight = 400; // Increase SVG height
+            var rectwidth = 133.33; // Increase rectangle width
+            var rectheight = 133.33; // Increase rectangle height
+
+            // Create an SVG with the desired content
+            var svg = '<svg width="' + svgwidth + '" height="' + svgheight + '" xmlns="http://www.w3.org/2000/svg">';
+            svg += '<rect x="0" y="0" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<rect x="' + rectwidth + '" y="0" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<rect x="' + (2 * rectwidth) + '" y="0" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<rect x="0" y="' + rectheight + '" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<rect x="' + rectwidth + '" y="' + rectheight + '" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<rect x="' + (2 * rectwidth) + '" y="' + rectheight + '" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<rect x="0" y="' + (2 * rectheight) + '" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<rect x="' + rectwidth + '" y="' + (2 * rectheight) + '" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<rect x="' + (2 * rectwidth) + '" y="' + (2 * rectheight) + '" width="' + rectwidth + '" height="' + rectheight + '" fill="' + fillcolor + '" stroke="' + strokecolor + '" stroke-width="' + strokewidth + '" />';
+            svg += '<text x="' + (rectwidth / 2) + '" y="' + (rectheight / 2) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[0] + '</text>';
+            svg += '<text x="' + (rectwidth + (rectwidth / 2)) + '" y="' + (rectheight / 2) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[1] + '</text>';
+            svg += '<text x="' + ((2 * rectwidth) + (rectwidth / 2)) + '" y="' + (rectheight / 2) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[2] + '</text>';
+            svg += '<text x="' + (rectwidth / 2) + '" y="' + (rectheight + (rectheight / 2)) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[3] + '</text>';
+            svg += '<text x="' + (rectwidth + (rectwidth / 2)) + '" y="' + (rectheight + (rectheight / 2)) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[4] + '</text>';
+            svg += '<text x="' + ((2 * rectwidth) + (rectwidth / 2)) + '" y="' + (rectheight + (rectheight / 2)) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[5] + '</text>';
+            svg += '<text x="' + (rectwidth / 2) + '" y="' + ((2 * rectheight) + (rectheight / 2)) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[6] + '</text>';
+            svg += '<text x="' + (rectwidth + (rectwidth / 2)) + '" y="' + ((2 * rectheight) + (rectheight / 2)) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[7] + '</text>';
+            svg += '<text x="' + ((2 * rectwidth) + (rectwidth / 2)) + '" y="' + ((2 * rectheight) + (rectheight / 2)) + '" font-size="' + fontsize + '" text-anchor="middle" fill="' + textcolor + '">' + dataarray[8] + '</text>';
+            svg += '</svg>';
+
+
+            // Create a data object with the SVG content
+            nodesArray.push({
+                id: data.id,
+                shape: 'image',
+                image: 'data:image/svg+xml;base64,' + btoa(svg), // Convert SVG to base64
+                level: data.level
+            });
+        });
+
+        // Create a data set from the array
+        var nodesData = new vis.DataSet(nodesArray);
+
+        var data = {
+            nodes: nodesData,
+            edges: new vis.DataSet({{ edges| safe }}),
+        };
+
+        // Create a network visualization
+        var container = document.getElementById('network');
+        var options = {
+            layout: {
+                hierarchical: {
+                    direction: 'UD',
+                    sortMethod: 'directed',
+                    levelSeparation: 120,
+                    nodeSpacing: 55,
+                }
+            },
+            physics: {
+                enabled: false
+            },
+        };
+        var network = new vis.Network(container, data, options);
+    </script>
+
+</body>
+
+</html>
