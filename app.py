@@ -99,7 +99,7 @@ def render_state_space_tree():
 
         for depth, states_at_depth in explored_states.items():
             for state in states_at_depth:
-                # Add nodes
+                #add nodes
                 nodes.append({"id": str(state.state), 'label': str(
                     state.state), "level": f"{depth}"})
 
