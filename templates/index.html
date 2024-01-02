@@ -34,14 +34,12 @@
         }
     
         .form-cont {
+            flex: 1;
             background-color: #ffffff;
             border: 1px solid #ccc;
-            border-radius: 5px;
+           
             padding: 20px;
-            margin: 20px auto;
-            width: 100%; /* Take up the entire width of the screen */
-            max-width: 800px; /* Set a maximum width for the form */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            
         }
     
         label {
@@ -75,17 +73,23 @@
             margin: 0; /* Remove margin to take up entire screen */
             border: 1px solid #ccc;
             border-radius: 5px;
+            flex: 4;
             padding: 20px;
             background-color: #fff;
             width: 100vw; /* 100% of viewport width */
             height: 100vh; /* 100% of viewport height */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
+        .app{
+            display: flex;
+        }
     </style>
     
 </head>
 
 <body>
+    <section class="app">
     <div class="form-cont">
         <h1 class="bg-body-tertiary text-center">8 Puzzle Game State Space Tree Visualizer</h1>
         <form method="POST">
@@ -105,6 +109,7 @@
         </form>
     </div>
     <div id="network"></div>
+</section>
    
 
     <script>
