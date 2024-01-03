@@ -8,11 +8,12 @@ app = Flask(__name__)
 
 
 class PuzzleState:
-    def __init__(self, state,depth, parent=None, move=""):
+    def __init__(self, state,depth, parent=None, move="",fvalue=None):
         self.state = state
         self.parent = parent
         self.move = move
         self.depth = depth
+        self.fvalue = fvalue
         
 
     def __eq__(self, other):
@@ -20,8 +21,58 @@ class PuzzleState:
     
     def __hash__(self) -> int:
         return hash(str(self.state))
+    
+    
+    
+##############################################################################
+# Code For A* Search using Manhattan Distance
+##############################################################################
+    
+    
+def calculate_manhattan_distance(state:PuzzleState,goal_state:PuzzleState):
+    size = 3  # Assuming a 3x3 puzzle
+    # Convert the state list into a 2D list for easier indexing
+    state_2d = [state.state[i:i+size] for i in range(0, size*size, size)]
+    total_distance = 0
+
+    for i in range(size):
+        for j in range(size):
+            if state_2d[i][j] != 0:
+                # Calculate the Manhattan distance for each tile
+                goal_position = divmod(goal_state.state.index(state_2d[i][j]), size)
+                total_distance += abs(i - goal_position[0]) + abs(j - goal_position[1])
+
+    return total_distance
 
 
+def a_star(initial_state:PuzzleState, goal_state:PuzzleState):
+        visited: set[PuzzleState] = set([initial_state])
+        open:list = []
+        closed:list = []
+        initial_state.fvalue = calculate_manhattan_distance(state=initial_state, goal_state=goal_state)
+        open.append(initial_state)
+        while True:
+            current_state = open[0]
+            # for i in cur.data:
+            #     for j in i:
+            #         print(j, end=" ")
+            #     print("")
+            # if the difference between current and goal node is 0 we have reached the goal node
+            if (calculate_manhattan_distance(current_state, goal_state) == 0):
+                return visited
+            for i in cleaned_generate_successors(current_state):
+                i.fval = calculate_manhattan_distance(i, goal_state)
+                open.append(i)
+                visited.add(i)
+            closed.append(current_state)
+            del open[0]
+            open.sort(key=lambda x: x.fval, reverse=False)
+
+
+
+#######################################################################
+# Children Generator Function
+#######################################################################
 def generate_successors(state):
     successors = []
     zero_index = state.state.index(0)
@@ -65,6 +116,9 @@ def cleaned_generate_successors(state:PuzzleState) -> list[PuzzleState]:
 
     return successors
 
+#####################################################################################
+# Breadth First Search Function
+#####################################################################################
 def cleaned_bfs(initial_state:PuzzleState, goal_state:PuzzleState):
     queue: deque[PuzzleState] = deque([initial_state])
     visited: set[PuzzleState] = set([initial_state])
@@ -106,6 +160,9 @@ def bfs(initial_state, goal_state):
                 queue.append((successor, depth + 1))
 
 
+#####################################################################################
+# Depth First Search Function
+#####################################################################################
 def cleaned_dfs(initial_state, goal_state):
     stack: deque[PuzzleState] = deque([initial_state])
     visited: set[PuzzleState] = set([initial_state])
@@ -146,6 +203,12 @@ def dfs(initial_state, goal_state):
                     visited.add(tuple(successor.state))
                     stack.append((successor, depth + 1))
 
+
+
+######################################################################################
+# Flask Specific:
+# Renders web UI
+######################################################################################
 
 @app.route('/', methods=['GET', 'POST'])
 def render_state_space_tree():
@@ -217,7 +280,7 @@ def render_cleaned_state_space_tree():
         initial_state = PuzzleState(initial,0)
         goal_state = PuzzleState(goal,0)
 
-        explored_states: list[PuzzleState] = cleaned_dfs(initial_state, goal_state)
+        explored_states: list[PuzzleState] = a_star(initial_state, goal_state)
         
 
         # Prepare the data for vis.js network
