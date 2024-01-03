@@ -95,15 +95,32 @@
         <form method="POST">
             <label for="search_algorithm">Select Search Algorithm:</label>
             <select name="search_algorithm" id="search_algorithm">
+
+                {% if algorithm == "bfs" %}
+                <option value="bfs" selected>BFS</option>
+                {% else %}
                 <option value="bfs">BFS</option>
+                {% endif %}
+
+                {% if algorithm == "dfs" %}
+                <option value="dfs" selected>DFS</option>
+                {% else %}
                 <option value="dfs">DFS</option>
+                {% endif %}
+
+                {% if algorithm == "astar" %}
+                <option value="astar" selected>A Star</option>
+                {% else %}
+                <option value="astar">A Star</option>
+                {% endif %}
+               
             </select>
             <br>
             <label for="initial">Initial State:</label>
-            <input type="text" name="initial" required>
+            <input type="text" value="{{initial}}" name="initial" required>
             <br>
-            <label for="final">Goal State:</label>
-            <input type="text" name="final" required>
+            <label for="final" >Goal State:</label>
+            <input type="text" value="{{goal}}" name="final" required>
             <br>
             <button type="submit">Search</button>
         </form>

@@ -268,11 +268,11 @@ def render_state_space_tree():
                     edges.append({"from": str(state.parent.state),
                                  "to": str(state.state), 'arrows': 'to'})
 
-        context = {"nodes": nodes, "edges": edges}
+        context = {"nodes": nodes, "edges": edges,"algorithm":search_algorithm,"initial":initial,"goal":goal,}
         return render_template("index.html", **context)
 
 
-@app.route('/cleaned', methods=['GET'])
+@app.route('/cleaned', methods=['GET','POST'])
 def render_cleaned_state_space_tree():
     if request.method == 'GET':
         initial = [2, 8, 3, 1, 6, 4, 7, 0, 5]
@@ -280,7 +280,7 @@ def render_cleaned_state_space_tree():
         initial_state = PuzzleState(initial,0)
         goal_state = PuzzleState(goal,0)
 
-        explored_states: list[PuzzleState] = a_star(initial_state, goal_state)
+        explored_states: list[PuzzleState] = cleaned_bfs(initial_state, goal_state)
         
 
         # Prepare the data for vis.js network
@@ -295,8 +295,41 @@ def render_cleaned_state_space_tree():
                 edges.append({"from": str(state.parent.state),
                                 "to": str(state.state), 'arrows': 'to'})
 
-        context = {"nodes": nodes, "edges": edges}
+        context = {"nodes": nodes, "edges": edges,"algorithm":"bfs","initial":' '.join([str(x) for x in initial]),"goal":' '.join([str(x) for x in goal])}
         return render_template("index.html", **context)
+    
+    if request.method == "POST":
+        search_algorithm = request.form.get('search_algorithm')
+
+        initial = [int(x) for x in request.form.get('initial').split(' ')]
+        goal = [int(x) for x in request.form.get('final').split(' ')]
+        initial_state = PuzzleState(initial,0)
+        goal_state = PuzzleState(goal,0)
+
+        if search_algorithm == 'bfs':
+            explored_states = cleaned_bfs(initial_state, goal_state)
+        elif search_algorithm == 'dfs':
+            explored_states = cleaned_dfs(initial_state, goal_state)
+        elif search_algorithm == "astar":
+            explored_states = a_star(initial_state,goal_state)
+        else:
+            return "Invalid search algorithm"
+
+        # Prepare the data for vis.js network
+        nodes = []
+        edges = []
+
+        for state in explored_states:
+            nodes.append({"id": str(state.state), 'label': str(
+                state.state), "level": f"{state.depth}"})
+                # Add edges (parent-child relationship)
+            if state.parent:
+                edges.append({"from": str(state.parent.state),
+                                "to": str(state.state), 'arrows': 'to'})
+
+        context = {"nodes": nodes, "edges": edges,"algorithm":search_algorithm,"initial":' '.join([str(x) for x in initial]),"goal":' '.join([str(x) for x in goal]),}
+        return render_template("index.html", **context)
+
 
 
 if __name__ == "__main__":
