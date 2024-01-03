@@ -34,14 +34,12 @@
         }
     
         .form-cont {
+            flex: 1;
             background-color: #ffffff;
             border: 1px solid #ccc;
-            border-radius: 5px;
+           
             padding: 20px;
-            margin: 20px auto;
-            width: 100%; /* Take up the entire width of the screen */
-            max-width: 800px; /* Set a maximum width for the form */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            
         }
     
         label {
@@ -75,36 +73,60 @@
             margin: 0; /* Remove margin to take up entire screen */
             border: 1px solid #ccc;
             border-radius: 5px;
+            flex: 4;
             padding: 20px;
             background-color: #fff;
             width: 100vw; /* 100% of viewport width */
             height: 100vh; /* 100% of viewport height */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
+        .app{
+            display: flex;
+        }
     </style>
     
 </head>
 
 <body>
+    <section class="app">
     <div class="form-cont">
         <h1 class="bg-body-tertiary text-center">8 Puzzle Game State Space Tree Visualizer</h1>
         <form method="POST">
             <label for="search_algorithm">Select Search Algorithm:</label>
             <select name="search_algorithm" id="search_algorithm">
+
+                {% if algorithm == "bfs" %}
+                <option value="bfs" selected>BFS</option>
+                {% else %}
                 <option value="bfs">BFS</option>
+                {% endif %}
+
+                {% if algorithm == "dfs" %}
+                <option value="dfs" selected>DFS</option>
+                {% else %}
                 <option value="dfs">DFS</option>
+                {% endif %}
+
+                {% if algorithm == "astar" %}
+                <option value="astar" selected>A Star</option>
+                {% else %}
+                <option value="astar">A Star</option>
+                {% endif %}
+               
             </select>
             <br>
             <label for="initial">Initial State:</label>
-            <input type="text" name="initial" required>
+            <input type="text" value="{{initial}}" name="initial" required>
             <br>
-            <label for="final">Goal State:</label>
-            <input type="text" name="final" required>
+            <label for="final" >Goal State:</label>
+            <input type="text" value="{{goal}}" name="final" required>
             <br>
             <button type="submit">Search</button>
         </form>
     </div>
     <div id="network"></div>
+</section>
    
 
     <script>
