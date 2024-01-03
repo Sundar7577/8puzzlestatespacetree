@@ -47,7 +47,7 @@ def generate_successors(state):
 def cleaned_generate_successors(state:PuzzleState) -> list[PuzzleState]:
     successors:list[PuzzleState] = []
     zero_index = state.state.index(0)
-    moves = [-1, 1, -3, 3]  # Left, Right, Up, Down
+    moves = [-1, 1, -3, 3]
 
     for move in moves:
         new_index = zero_index + move
@@ -68,7 +68,6 @@ def cleaned_generate_successors(state:PuzzleState) -> list[PuzzleState]:
 def cleaned_bfs(initial_state:PuzzleState, goal_state:PuzzleState):
     queue: deque[PuzzleState] = deque([initial_state])
     visited: set[PuzzleState] = set([initial_state])
-    all_states: set[PuzzleState] = {}
 
     while queue:
         current_state:PuzzleState = queue.popleft()
@@ -81,6 +80,8 @@ def cleaned_bfs(initial_state:PuzzleState, goal_state:PuzzleState):
         for successor in successors:
             if successor not in visited:
                 queue.append(successor)
+            
+            
 
 def bfs(initial_state, goal_state):
     queue = deque([(initial_state, 0)])
@@ -104,6 +105,23 @@ def bfs(initial_state, goal_state):
                 visited.add(tuple(successor.state))
                 queue.append((successor, depth + 1))
 
+
+def cleaned_dfs(initial_state, goal_state):
+    stack: deque[PuzzleState] = deque([initial_state])
+    visited: set[PuzzleState] = set([initial_state])
+
+    while stack:
+        current_state = stack.pop()
+        visited.add(current_state)
+
+        if current_state.state == goal_state.state:
+            return list(visited)
+
+        successors = cleaned_generate_successors(current_state)
+        if current_state.depth < 8:  # Limit the depth
+            for successor in successors:
+                if successor not in visited:
+                    stack.append((successor))
 
 def dfs(initial_state, goal_state):
     stack = [(initial_state, 0)]
@@ -162,8 +180,8 @@ def render_state_space_tree():
 
         initial = [int(x) for x in request.form.get('initial').split(' ')]
         goal = [int(x) for x in request.form.get('final').split(' ')]
-        initial_state = PuzzleState(initial)
-        goal_state = PuzzleState(goal)
+        initial_state = PuzzleState(initial,0)
+        goal_state = PuzzleState(goal,0)
 
         if search_algorithm == 'bfs':
             explored_states = bfs(initial_state, goal_state)
@@ -199,7 +217,8 @@ def render_cleaned_state_space_tree():
         initial_state = PuzzleState(initial,0)
         goal_state = PuzzleState(goal,0)
 
-        explored_states: set[PuzzleState] = cleaned_bfs(initial_state, goal_state)
+        explored_states: list[PuzzleState] = cleaned_dfs(initial_state, goal_state)
+        
 
         # Prepare the data for vis.js network
         nodes = []
